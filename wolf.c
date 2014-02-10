@@ -182,19 +182,19 @@ static void wolf_input(void)
 				running = false;
 				break;
 			case SDLK_UP: {
-				velocity = 0.1;
+				velocity = 0.02;
 				break;
 			}
 			case SDLK_DOWN: {
-				velocity = -0.1;
+				velocity = -0.02;
 				break;
 			}
 			case SDLK_RIGHT: {
-				angle = 0.05;
+				angle = 0.01;
 				break;
 			}
 			case SDLK_LEFT: {
-				angle = -0.05;
+				angle = -0.01;
 				break;
 			}
 			default:
@@ -235,10 +235,7 @@ int main(int argc, char* argv[])
 	while (running) {
 		wolf_input();
 		wolf_update();
-
 		wolf_frame(renderer, &position, &direction);
-
-		SDL_Delay(10);
 	}
 
 	SDL_DestroyWindow(window);
