@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <math.h>
 #include <SDL.h>
 
 enum {
@@ -45,6 +46,11 @@ struct vector2 {
 	double y;
 };
 
+static double degrees_to_radians(double angle)
+{
+	return angle * M_PI/180.0;
+}
+
 static void wolf_set_color(SDL_Renderer *renderer, int color)
 {
 	switch (color) {
@@ -71,7 +77,7 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 {
 	double map_x, map_y;
 	int nr_rays = 640;
-	double fov = 1.57; /* 90 degrees */
+	double fov = degrees_to_radians(90);
 	double fov_step = fov / (double)nr_rays;
 
 	for (double i = -nr_rays/2; i < nr_rays/2; i++) {
