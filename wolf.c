@@ -45,6 +45,28 @@ struct vector2 {
 	double y;
 };
 
+static void wolf_set_color(SDL_Renderer *renderer, int color)
+{
+	switch (color) {
+        case 1: /* red */
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		break;
+        case 2: /* green */
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+		break;
+        case 3: /* blue */
+		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		break;
+        case 4: /* white */
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		break;
+        default:
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+		break;
+	}
+
+}
+
 static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction)
 {
 	double map_x, map_y;
@@ -73,7 +95,7 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 		rect.y = (int)map_y * 8;
 		rect.w = 8;
 		rect.h = 8;
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		wolf_set_color(renderer, map[(int)map_x][(int)map_y]);
 		SDL_RenderFillRect(renderer, &rect);
 		SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
 		SDL_RenderDrawLine(renderer, (int)position->x*8, (int)position->y*8, (int)map_x*8, (int)map_y*8);
