@@ -6,6 +6,7 @@
 enum {
 	MAP_WIDTH	= 24,
 	MAP_HEIGHT	= 24,
+	CELL_SIZE	= 16
 };
 
 static char map[MAP_WIDTH][MAP_HEIGHT] =
@@ -97,14 +98,14 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 			map_y += ray_direction.y;
 		}
 		SDL_Rect rect;
-		rect.x = (int)map_x * 8;
-		rect.y = (int)map_y * 8;
-		rect.w = 8;
-		rect.h = 8;
+		rect.x = (int)map_x * CELL_SIZE;
+		rect.y = (int)map_y * CELL_SIZE;
+		rect.w = CELL_SIZE;
+		rect.h = CELL_SIZE;
 		wolf_set_color(renderer, map[(int)map_x][(int)map_y]);
 		SDL_RenderFillRect(renderer, &rect);
 		SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
-		SDL_RenderDrawLine(renderer, position->x*8, position->y*8, (int)map_x*8, (int)map_y*8);
+		SDL_RenderDrawLine(renderer, position->x*CELL_SIZE, position->y*CELL_SIZE, (int)map_x*CELL_SIZE, (int)map_y*CELL_SIZE);
 	}
 }
 
@@ -120,10 +121,10 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 			if (!map[x][y])
 				continue;
 			SDL_Rect rect;
-			rect.x = x * 8;
-			rect.y = y * 8;
-			rect.w = 8;
-			rect.h = 8;
+			rect.x = x * CELL_SIZE;
+			rect.y = y * CELL_SIZE;
+			rect.w = CELL_SIZE;
+			rect.h = CELL_SIZE;
 			SDL_RenderFillRect(renderer, &rect);
 		}
 	}
