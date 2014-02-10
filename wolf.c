@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <assert.h>
 #include <stdio.h>
 #include <SDL.h>
 
