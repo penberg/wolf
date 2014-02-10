@@ -98,7 +98,7 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 		wolf_set_color(renderer, map[(int)map_x][(int)map_y]);
 		SDL_RenderFillRect(renderer, &rect);
 		SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
-		SDL_RenderDrawLine(renderer, (int)position->x*8, (int)position->y*8, (int)map_x*8, (int)map_y*8);
+		SDL_RenderDrawLine(renderer, position->x*8, position->y*8, (int)map_x*8, (int)map_y*8);
 	}
 }
 
