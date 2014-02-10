@@ -143,9 +143,15 @@ static float angle;
 static void wolf_update(void)
 {
 	struct vector2 new_direction;
+	struct point2 new_position;
 
-	position.x = position.x + direction.x*velocity;
-	position.y = position.y + direction.y*velocity;
+	new_position.x = position.x + direction.x*velocity;
+	new_position.y = position.y + direction.y*velocity;
+
+	if (!map[(int)new_position.x][(int)new_position.y]) {
+		position.x = new_position.x;
+		position.y = new_position.y;
+	}
 
 	new_direction.x = direction.x * cos(angle) - direction.y * sin(angle);
 	new_direction.y = direction.x * sin(angle) + direction.y * cos(angle);
