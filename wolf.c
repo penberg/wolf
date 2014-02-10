@@ -111,16 +111,16 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 
 	for (int y = 0; y < MAP_HEIGHT; y++) {
 		for (int x = 0; x < MAP_WIDTH; x++) {
-		if (!map[x][y])
-					continue;
-				SDL_Rect rect;
-				rect.x = x * 8;
-				rect.y = y * 8;
-				rect.w = 8;
-				rect.h = 8;
-				SDL_RenderFillRect(renderer, &rect);
-			}
+			if (!map[x][y])
+				continue;
+			SDL_Rect rect;
+			rect.x = x * 8;
+			rect.y = y * 8;
+			rect.w = 8;
+			rect.h = 8;
+			SDL_RenderFillRect(renderer, &rect);
 		}
+	}
 
 	wolf_raycast(renderer, position, direction);
 
