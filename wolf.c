@@ -127,8 +127,89 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 	SDL_RenderPresent(renderer);
 }
 
-int main(int argc, char* argv[]) {
+static struct point2 position = { .x = 22, .y =  12 };
+static struct vector2 direction = { .x = -1, .y =  0 }; 
+static bool running = true;
+static float velocity;
+static float angle;
 
+static void wolf_update(void)
+{
+	struct vector2 new_direction;
+
+	position.x = position.x + direction.x*velocity;
+	position.y = position.y + direction.y*velocity;
+
+	new_direction.x = direction.x * cos(angle) - direction.y * sin(angle);
+	new_direction.y = direction.x * sin(angle) + direction.y * cos(angle);
+
+	direction.x = new_direction.x;
+	direction.y = new_direction.y;
+}
+
+static void wolf_input(void)
+{
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event)) {
+	switch (event.type) {
+		case SDL_KEYUP: {
+			switch (event.key.keysym.sym) {
+			case SDLK_UP: {
+				velocity = 0.0;
+				break;
+			}
+			case SDLK_DOWN: {
+				velocity = 0.0;
+				break;
+			}
+			case SDLK_RIGHT: {
+				angle = 0.0;
+				break;
+			}
+			case SDLK_LEFT: {
+				angle = 0.0;
+				break;
+			}
+			default:
+				break;
+			}
+			break;
+		}
+		case SDL_KEYDOWN: {
+			switch (event.key.keysym.sym) {
+			case SDLK_ESCAPE:
+				running = false;
+				break;
+			case SDLK_UP: {
+				velocity = 0.1;
+				break;
+			}
+			case SDLK_DOWN: {
+				velocity = -0.1;
+				break;
+			}
+			case SDLK_RIGHT: {
+				angle = 0.05;
+				break;
+			}
+			case SDLK_LEFT: {
+				angle = -0.05;
+				break;
+			}
+			default:
+				break;
+			}
+			break;
+		}
+		default:
+			break;
+		}
+	}
+}
+
+int main(int argc, char* argv[])
+{
 	SDL_Window *window;
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -151,55 +232,9 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	struct point2 position = { .x = 22, .y =  12 };
-	struct vector2 direction = { .x = -1, .y =  0 }; 
-	bool running = true;
-
 	while (running) {
-		SDL_Event event;
-
-		SDL_PollEvent(&event);
-
-		switch (event.type) {
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_ESCAPE:
-				running = false;
-				break;
-			case SDLK_UP: {
-				float velocity = 0.1;
-				position.x = position.x + direction.x*velocity;
-				position.y = position.y + direction.y*velocity;
-				break;
-			}
-			case SDLK_DOWN: {
-				float velocity = -0.1;
-				position.x = position.x + direction.x*velocity;
-				position.y = position.y + direction.y*velocity;
-				break;
-			}
-			case SDLK_RIGHT: {
-				struct vector2 new_direction;
-				float angle = 0.05;
-				new_direction.x = direction.x * cos(angle) - direction.y * sin(angle);
-				new_direction.y = direction.x * sin(angle) + direction.y * cos(angle);
-				direction.x = new_direction.x;
-				direction.y = new_direction.y;
-				break;
-			}
-			case SDLK_LEFT: {
-				struct vector2 new_direction;
-				float angle = 0.05;
-				new_direction.x = direction.x * cos(-angle) - direction.y * sin(-angle);
-				new_direction.y = direction.x * sin(-angle) + direction.y * cos(-angle);
-				direction.x = new_direction.x;
-				direction.y = new_direction.y;
-				break;
-			}
-			default:
-				break;
-			}
-		}
+		wolf_input();
+		wolf_update();
 
 		wolf_frame(renderer, &position, &direction);
 
