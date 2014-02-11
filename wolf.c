@@ -140,21 +140,21 @@ static bool running = true;
 static float velocity;
 static float angle;
 
-static void wolf_update(void)
+static void wolf_update(unsigned int time_delta)
 {
 	struct vector2 new_direction;
 	struct point2 new_position;
 
-	new_position.x = position.x + direction.x*velocity;
-	new_position.y = position.y + direction.y*velocity;
+	new_position.x = position.x + direction.x*velocity * time_delta;
+	new_position.y = position.y + direction.y*velocity * time_delta;
 
 	if (!map[(int)new_position.x][(int)new_position.y]) {
 		position.x = new_position.x;
 		position.y = new_position.y;
 	}
 
-	new_direction.x = direction.x * cos(angle) - direction.y * sin(angle);
-	new_direction.y = direction.x * sin(angle) + direction.y * cos(angle);
+	new_direction.x = direction.x * cos(angle*time_delta) - direction.y * sin(angle*time_delta);
+	new_direction.y = direction.x * sin(angle*time_delta) + direction.y * cos(angle*time_delta);
 
 	direction.x = new_direction.x;
 	direction.y = new_direction.y;
@@ -195,19 +195,19 @@ static void wolf_input(void)
 				running = false;
 				break;
 			case SDLK_UP: {
-				velocity = 0.02;
+				velocity = 0.005;
 				break;
 			}
 			case SDLK_DOWN: {
-				velocity = -0.02;
+				velocity = -0.005;
 				break;
 			}
 			case SDLK_RIGHT: {
-				angle = 0.01;
+				angle = 0.005;
 				break;
 			}
 			case SDLK_LEFT: {
-				angle = -0.01;
+				angle = -0.005;
 				break;
 			}
 			default:
@@ -245,10 +245,22 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	unsigned int time_delta = 0;
+
 	while (running) {
+		unsigned int frame_start, frame_end;
+
+		frame_start = SDL_GetTicks();
+
 		wolf_input();
-		wolf_update();
+
+		wolf_update(time_delta);
+
 		wolf_frame(renderer, &position, &direction);
+
+		frame_end = SDL_GetTicks();
+
+		time_delta = frame_end - frame_start;
 	}
 
 	SDL_DestroyWindow(window);
