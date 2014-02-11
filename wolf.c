@@ -1,4 +1,6 @@
 #include <stdbool.h>
+#include <GL/glu.h>
+#include <GL/gl.h>
 #include <stdio.h>
 #include <math.h>
 #include <SDL.h>
@@ -6,7 +8,7 @@
 enum {
 	MAP_WIDTH	= 24,
 	MAP_HEIGHT	= 24,
-	CELL_SIZE	= 16
+	CELL_SIZE	= 4,
 };
 
 static char map[MAP_WIDTH][MAP_HEIGHT] =
@@ -47,38 +49,45 @@ struct vector2 {
 	double y;
 };
 
+static double radians_to_degrees(double angle)
+{
+	return angle * 180.0/M_PI;
+}
+
 static double degrees_to_radians(double angle)
 {
 	return angle * M_PI/180.0;
 }
 
-static void wolf_set_color(SDL_Renderer *renderer, int color)
+static void wolf_set_color(int color)
 {
 	switch (color) {
         case 1: /* red */
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		glColor3f(1.0, 0.0, 0.0);
 		break;
         case 2: /* green */
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+		glColor3f(0.0, 1.0, 0.0);
 		break;
         case 3: /* blue */
-		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		glColor3f(0.0, 0.0, 1.0);
 		break;
         case 4: /* white */
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		glColor3f(1.0, 1.0, 1.0);
 		break;
         default:
-		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+		glColor3f(1.0, 1.0, 0.0);
 		break;
 	}
 
 }
 
+#define FOV 90
+
 static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction)
 {
 	double map_x, map_y;
 	int nr_rays = 640;
-	double fov = degrees_to_radians(90);
+	double fov = degrees_to_radians(FOV);
 	double fov_step = fov / (double)nr_rays;
 
 	for (double i = -nr_rays/2; i < nr_rays/2; i++) {
@@ -102,19 +111,17 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 		rect.y = (int)map_y * CELL_SIZE;
 		rect.w = CELL_SIZE;
 		rect.h = CELL_SIZE;
-		wolf_set_color(renderer, map[(int)map_x][(int)map_y]);
+		wolf_set_color(map[(int)map_x][(int)map_y]);
 		SDL_RenderFillRect(renderer, &rect);
-		SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+
+		glColor3f(0.5, 0.5, 0.5);
 		SDL_RenderDrawLine(renderer, position->x*CELL_SIZE, position->y*CELL_SIZE, (int)map_x*CELL_SIZE, (int)map_y*CELL_SIZE);
 	}
 }
 
 static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction)
 {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-
-	SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+	glColor3f(0.5, 0.5, 0.5);
 
 	for (int y = 0; y < MAP_HEIGHT; y++) {
 		for (int x = 0; x < MAP_WIDTH; x++) {
@@ -128,17 +135,15 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 			SDL_RenderFillRect(renderer, &rect);
 		}
 	}
-
 	wolf_raycast(renderer, position, direction);
-
-	SDL_RenderPresent(renderer);
 }
 
-static struct point2 position = { .x = 22, .y =  12 };
-static struct vector2 direction = { .x = -1, .y =  0 }; 
+static struct point2 position   = { .x = 1, .y = 1 };
+static struct vector2 direction = { .x = 1, .y = 0 }; 
 static bool running = true;
 static float velocity;
-static float angle;
+static float angle_step;
+static float angle = 0.0;
 
 static void wolf_update(unsigned int time_delta)
 {
@@ -153,8 +158,10 @@ static void wolf_update(unsigned int time_delta)
 		position.y = new_position.y;
 	}
 
-	new_direction.x = direction.x * cos(angle*time_delta) - direction.y * sin(angle*time_delta);
-	new_direction.y = direction.x * sin(angle*time_delta) + direction.y * cos(angle*time_delta);
+	angle += angle_step*time_delta;
+
+	new_direction.x = direction.x * cos(angle_step*time_delta) - direction.y * sin(angle_step*time_delta);
+	new_direction.y = direction.x * sin(angle_step*time_delta) + direction.y * cos(angle_step*time_delta);
 
 	direction.x = new_direction.x;
 	direction.y = new_direction.y;
@@ -177,11 +184,11 @@ static void wolf_input(void)
 				break;
 			}
 			case SDLK_RIGHT: {
-				angle = 0.0;
+				angle_step = 0.0;
 				break;
 			}
 			case SDLK_LEFT: {
-				angle = 0.0;
+				angle_step = 0.0;
 				break;
 			}
 			default:
@@ -203,11 +210,11 @@ static void wolf_input(void)
 				break;
 			}
 			case SDLK_RIGHT: {
-				angle = 0.005;
+				angle_step = 0.005;
 				break;
 			}
 			case SDLK_LEFT: {
-				angle = -0.005;
+				angle_step = -0.005;
 				break;
 			}
 			default:
@@ -235,15 +242,19 @@ int main(int argc, char* argv[])
 		480,
 		SDL_WINDOW_OPENGL
 	);
-
-	SDL_Renderer *renderer;
-
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
 	if (!window) {
 		fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
 		return 1;
 	}
+
+	SDL_Renderer *renderer;
+
+	renderer = SDL_CreateRenderer(window, -1,
+				SDL_RENDERER_ACCELERATED |
+				SDL_RENDERER_PRESENTVSYNC);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	glViewport(0, 0, (GLsizei) 640, (GLsizei) 480);
 
 	unsigned int time_delta = 0;
 
@@ -256,7 +267,63 @@ int main(int argc, char* argv[])
 
 		wolf_update(time_delta);
 
+		glClearColor(0,0,0,0); 
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+
+		glMatrixMode(GL_PROJECTION); 
+		glLoadIdentity();
+		gluPerspective(FOV, 640.0/480.0, 0.1f, 64.0f);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glRotatef(90+radians_to_degrees(angle), 0, 1, 0);
+		glTranslatef(-position.x, -0.3, -position.y);
+
+		glEnable(GL_DEPTH_TEST);
+
+		for (int y = 0; y < MAP_HEIGHT; y++) {
+			for (int x = 0; x < MAP_WIDTH; x++) {
+				if (!map[x][y])
+					continue;
+				wolf_set_color(map[x][y]);
+				glBegin(GL_QUADS);
+				glVertex3f(x+0.0f, 0.0f, y); // The bottom left corner  
+				glVertex3f(x+0.0f, 1.0f, y); // The top left corner  
+				glVertex3f(x+1.0f, 1.0f, y); // The top right corner  
+				glVertex3f(x+1.0f, 0.0f, y); // The bottom right corner  
+				glEnd();
+				glBegin(GL_QUADS);
+				glVertex3f(x+0.0f, 0.0f, y+1.0f); // The bottom left corner  
+				glVertex3f(x+0.0f, 1.0f, y+1.0f); // The top left corner  
+				glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
+				glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
+				glEnd();
+				glBegin(GL_QUADS);
+				glVertex3f(x, 0.0f, y+0.0f); // The bottom left corner  
+				glVertex3f(x, 1.0f, y+0.0f); // The top left corner  
+				glVertex3f(x, 1.0f, y+1.0f); // The top right corner  
+				glVertex3f(x, 0.0f, y+1.0f); // The bottom right corner  
+				glEnd();
+				glBegin(GL_QUADS);
+				glVertex3f(x+1.0f, 0.0f, y+0.0f); // The bottom left corner  
+				glVertex3f(x+1.0f, 1.0f, y+0.0f); // The top left corner  
+				glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
+				glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
+				glEnd();
+			}
+		}
+
+		glDisable(GL_DEPTH_TEST);
+
+		glMatrixMode(GL_PROJECTION); 
+		glLoadIdentity();
+		glOrtho(-640 + CELL_SIZE * MAP_WIDTH, CELL_SIZE * MAP_WIDTH, 480, 0, 0, 1); 
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 		wolf_frame(renderer, &position, &direction);
+
+		SDL_RenderPresent(renderer);
 
 		frame_end = SDL_GetTicks();
 
