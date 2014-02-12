@@ -132,7 +132,7 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 {
 	double map_x, map_y;
 	int nr_rays = 640;
-	double fov = degrees_to_radians(FOV);
+	double fov = degrees_to_radians(FOV) * 640.0/480.0;
 	double fov_step = fov / (double)nr_rays;
 
 	for (double i = -nr_rays/2; i < nr_rays/2; i++) {
