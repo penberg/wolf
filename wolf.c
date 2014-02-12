@@ -199,7 +199,7 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 	wolf_raycast(renderer, position, direction, wolf_minimap_draw_wall);
 }
 
-static struct point2 position   = { .x = 1, .y = 1 };
+static struct point2 position   = { .x = 1.5, .y = 2 };
 static struct vector2 direction = { .x = 1, .y = 0 }; 
 static bool running = true;
 static float velocity;
