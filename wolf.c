@@ -172,14 +172,7 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 
 	glEnable(GL_DEPTH_TEST);
 
-	for (int y = 0; y < MAP_HEIGHT; y++) {
-		for (int x = 0; x < MAP_WIDTH; x++) {
-			if (!map[x][y])
-				continue;
-
-			wolf_draw_wall(renderer, position, x, y);
-		}
-	}
+	wolf_raycast(renderer, position, direction, wolf_draw_wall);
 
 	glDisable(GL_DEPTH_TEST);
 
