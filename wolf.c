@@ -85,29 +85,32 @@ typedef void (*draw_wall_fn)(SDL_Renderer *renderer, struct point2 *position, in
 
 static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int x, int y)
 {
+	float wall_height = 1.5;
+
 	wolf_set_color(map[x][y]);
+
 	glBegin(GL_QUADS);
 	glVertex3f(x+0.0f, 0.0f, y); // The bottom left corner  
-	glVertex3f(x+0.0f, 1.0f, y); // The top left corner  
-	glVertex3f(x+1.0f, 1.0f, y); // The top right corner  
+	glVertex3f(x+0.0f, wall_height, y); // The top left corner  
+	glVertex3f(x+1.0f, wall_height, y); // The top right corner  
 	glVertex3f(x+1.0f, 0.0f, y); // The bottom right corner  
 	glEnd();
 	glBegin(GL_QUADS);
 	glVertex3f(x+0.0f, 0.0f, y+1.0f); // The bottom left corner  
-	glVertex3f(x+0.0f, 1.0f, y+1.0f); // The top left corner  
-	glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
+	glVertex3f(x+0.0f, wall_height, y+1.0f); // The top left corner  
+	glVertex3f(x+1.0f, wall_height, y+1.0f); // The top right corner  
 	glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
 	glEnd();
 	glBegin(GL_QUADS);
 	glVertex3f(x, 0.0f, y+0.0f); // The bottom left corner  
-	glVertex3f(x, 1.0f, y+0.0f); // The top left corner  
-	glVertex3f(x, 1.0f, y+1.0f); // The top right corner  
+	glVertex3f(x, wall_height, y+0.0f); // The top left corner  
+	glVertex3f(x, wall_height, y+1.0f); // The top right corner  
 	glVertex3f(x, 0.0f, y+1.0f); // The bottom right corner  
 	glEnd();
 	glBegin(GL_QUADS);
 	glVertex3f(x+1.0f, 0.0f, y+0.0f); // The bottom left corner  
-	glVertex3f(x+1.0f, 1.0f, y+0.0f); // The top left corner  
-	glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
+	glVertex3f(x+1.0f, wall_height, y+0.0f); // The top left corner  
+	glVertex3f(x+1.0f, wall_height, y+1.0f); // The top right corner  
 	glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
 	glEnd();
 }
