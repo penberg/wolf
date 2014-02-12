@@ -224,8 +224,8 @@ static void wolf_update(unsigned int time_delta)
 
 	angle += angle_step*time_delta;
 
-	new_direction.x = direction.x * cos(angle_step*time_delta) - direction.y * sin(angle_step*time_delta);
-	new_direction.y = direction.x * sin(angle_step*time_delta) + direction.y * cos(angle_step*time_delta);
+	new_direction.x = cos(angle);
+	new_direction.y = sin(angle);
 
 	direction.x = new_direction.x;
 	direction.y = new_direction.y;
