@@ -131,18 +131,20 @@ static void wolf_minimap_draw_wall(SDL_Renderer *renderer, struct point2 *positi
 
 #define FOV 90
 
-static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction, draw_wall_fn draw_wall)
+static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double angle, draw_wall_fn draw_wall)
 {
-	double map_x, map_y;
-	int nr_rays = 640;
 	double fov = degrees_to_radians(FOV) * 640.0/480.0;
-	double fov_step = fov / (double)nr_rays;
+	double ray_step = fov / (double) 640.0;
 
-	for (double i = -nr_rays/2; i < nr_rays/2; i++) {
+	for (int i = 0; i < 640; i++) {
 		struct vector2 ray_direction;
+		double map_x, map_y;
+		double ray_angle;
 
-		ray_direction.x = direction->x * cos(fov_step*i) - direction->y * sin(fov_step*i);
-		ray_direction.y = direction->x * sin(fov_step*i) + direction->y * cos(fov_step*i);
+		ray_angle = angle + -fov/2.0 + ray_step * i;
+
+		ray_direction.x = cos(ray_angle);
+		ray_direction.y = sin(ray_angle);
 
 		map_x = position->x;
 		map_y = position->y;
@@ -175,7 +177,7 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 
 	glEnable(GL_DEPTH_TEST);
 
-	wolf_raycast(renderer, position, direction, wolf_draw_wall);
+	wolf_raycast(renderer, position, angle, wolf_draw_wall);
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -199,7 +201,7 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 			SDL_RenderFillRect(renderer, &rect);
 		}
 	}
-	wolf_raycast(renderer, position, direction, wolf_minimap_draw_wall);
+	wolf_raycast(renderer, position, angle, wolf_minimap_draw_wall);
 }
 
 static struct point2 position   = { .x = 1.5, .y = 2 };
