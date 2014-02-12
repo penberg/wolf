@@ -119,8 +119,62 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 	}
 }
 
-static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction)
+static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction, float angle)
 {
+	glClearColor(0,0,0,0); 
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
+
+	glMatrixMode(GL_PROJECTION); 
+	glLoadIdentity();
+	gluPerspective(FOV, 640.0/480.0, 0.1f, 64.0f);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glRotatef(90+radians_to_degrees(angle), 0, 1, 0);
+	glTranslatef(-position->x, -0.3, -position->y);
+
+	glEnable(GL_DEPTH_TEST);
+
+	for (int y = 0; y < MAP_HEIGHT; y++) {
+		for (int x = 0; x < MAP_WIDTH; x++) {
+			if (!map[x][y])
+				continue;
+			wolf_set_color(map[x][y]);
+			glBegin(GL_QUADS);
+			glVertex3f(x+0.0f, 0.0f, y); // The bottom left corner  
+			glVertex3f(x+0.0f, 1.0f, y); // The top left corner  
+			glVertex3f(x+1.0f, 1.0f, y); // The top right corner  
+			glVertex3f(x+1.0f, 0.0f, y); // The bottom right corner  
+			glEnd();
+			glBegin(GL_QUADS);
+			glVertex3f(x+0.0f, 0.0f, y+1.0f); // The bottom left corner  
+			glVertex3f(x+0.0f, 1.0f, y+1.0f); // The top left corner  
+			glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
+			glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
+			glEnd();
+			glBegin(GL_QUADS);
+			glVertex3f(x, 0.0f, y+0.0f); // The bottom left corner  
+			glVertex3f(x, 1.0f, y+0.0f); // The top left corner  
+			glVertex3f(x, 1.0f, y+1.0f); // The top right corner  
+			glVertex3f(x, 0.0f, y+1.0f); // The bottom right corner  
+			glEnd();
+			glBegin(GL_QUADS);
+			glVertex3f(x+1.0f, 0.0f, y+0.0f); // The bottom left corner  
+			glVertex3f(x+1.0f, 1.0f, y+0.0f); // The top left corner  
+			glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
+			glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
+			glEnd();
+		}
+	}
+
+	glDisable(GL_DEPTH_TEST);
+
+	glMatrixMode(GL_PROJECTION); 
+	glLoadIdentity();
+	glOrtho(-640 + CELL_SIZE * MAP_WIDTH, CELL_SIZE * MAP_WIDTH, 480, 0, 0, 1); 
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	glColor3f(0.5, 0.5, 0.5);
 
 	for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -267,61 +321,7 @@ int main(int argc, char* argv[])
 
 		wolf_update(time_delta);
 
-		glClearColor(0,0,0,0); 
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
-
-		glMatrixMode(GL_PROJECTION); 
-		glLoadIdentity();
-		gluPerspective(FOV, 640.0/480.0, 0.1f, 64.0f);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glRotatef(90+radians_to_degrees(angle), 0, 1, 0);
-		glTranslatef(-position.x, -0.3, -position.y);
-
-		glEnable(GL_DEPTH_TEST);
-
-		for (int y = 0; y < MAP_HEIGHT; y++) {
-			for (int x = 0; x < MAP_WIDTH; x++) {
-				if (!map[x][y])
-					continue;
-				wolf_set_color(map[x][y]);
-				glBegin(GL_QUADS);
-				glVertex3f(x+0.0f, 0.0f, y); // The bottom left corner  
-				glVertex3f(x+0.0f, 1.0f, y); // The top left corner  
-				glVertex3f(x+1.0f, 1.0f, y); // The top right corner  
-				glVertex3f(x+1.0f, 0.0f, y); // The bottom right corner  
-				glEnd();
-				glBegin(GL_QUADS);
-				glVertex3f(x+0.0f, 0.0f, y+1.0f); // The bottom left corner  
-				glVertex3f(x+0.0f, 1.0f, y+1.0f); // The top left corner  
-				glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
-				glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
-				glEnd();
-				glBegin(GL_QUADS);
-				glVertex3f(x, 0.0f, y+0.0f); // The bottom left corner  
-				glVertex3f(x, 1.0f, y+0.0f); // The top left corner  
-				glVertex3f(x, 1.0f, y+1.0f); // The top right corner  
-				glVertex3f(x, 0.0f, y+1.0f); // The bottom right corner  
-				glEnd();
-				glBegin(GL_QUADS);
-				glVertex3f(x+1.0f, 0.0f, y+0.0f); // The bottom left corner  
-				glVertex3f(x+1.0f, 1.0f, y+0.0f); // The top left corner  
-				glVertex3f(x+1.0f, 1.0f, y+1.0f); // The top right corner  
-				glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
-				glEnd();
-			}
-		}
-
-		glDisable(GL_DEPTH_TEST);
-
-		glMatrixMode(GL_PROJECTION); 
-		glLoadIdentity();
-		glOrtho(-640 + CELL_SIZE * MAP_WIDTH, CELL_SIZE * MAP_WIDTH, 480, 0, 0, 1); 
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		wolf_frame(renderer, &position, &direction);
+		wolf_frame(renderer, &position, &direction, angle);
 
 		SDL_RenderPresent(renderer);
 
