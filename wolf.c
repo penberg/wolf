@@ -131,6 +131,17 @@ static void wolf_minimap_draw_wall(SDL_Renderer *renderer, struct point2 *positi
 
 #define FOV 90
 
+static int sign(double x)
+{
+	if (x < 0) {
+		return -1;
+	} else if (x > 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double angle, draw_wall_fn draw_wall)
 {
 	double fov = degrees_to_radians(FOV) * 640.0/480.0;
@@ -138,26 +149,56 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double
 
 	for (int i = 0; i < 640; i++) {
 		struct vector2 ray_direction;
-		double map_x, map_y;
+		double next_x, next_y;
+		double step_x, step_y;
+		double max_x, max_y;
 		double ray_angle;
+		double dx, dy;
+		int x, y;
 
 		ray_angle = angle + -fov/2.0 + ray_step * i;
-
 		ray_direction.x = cos(ray_angle);
 		ray_direction.y = sin(ray_angle);
 
-		map_x = position->x;
-		map_y = position->y;
+		x = position->x;
+		y = position->y;
+
+		step_x = sign(ray_direction.x);
+		step_y = sign(ray_direction.y);
+
+		next_x = x + (step_x > 0 ? 1 : 0);
+		next_y = y + (step_y > 0 ? 1 : 0);
+
+		max_x = (next_x - position->x) / ray_direction.x;
+		max_y = (next_y - position->y) / ray_direction.y;
+
+		if (isnan(max_x))
+			max_x = INFINITY;
+		if (isnan(max_y))
+			max_y = INFINITY;
+
+		dx = step_x / ray_direction.x;
+		dy = step_y / ray_direction.y;
+
+		if (isnan(dx))
+			dx = INFINITY;
+		if (isnan(dy))
+			dy = INFINITY;
 
 		for (;;) {
-			if (map[(int)map_x][(int)map_y] != 0)
+			if (map[x][y] != 0)
 				break;
 
-			map_x += ray_direction.x;
-			map_y += ray_direction.y;
+			if (max_x < max_y) {
+				max_x += dx;
+				x += step_x;
+			} else {
+				max_y += dy;
+				y += step_y;
+			}
 		}
 
-		draw_wall(renderer, position, map_x, map_y);
+		draw_wall(renderer, position, x, y);
 	}
 }
 
