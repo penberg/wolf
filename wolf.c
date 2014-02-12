@@ -81,9 +81,25 @@ static void wolf_set_color(int color)
 
 }
 
+typedef void (*draw_wall_fn)(SDL_Renderer *renderer, struct point2 *position, int x, int y);
+
+static void wolf_minimap_draw_wall(SDL_Renderer *renderer, struct point2 *position, int map_x, int map_y)
+{
+	SDL_Rect rect;
+	rect.x = map_x * CELL_SIZE;
+	rect.y = map_y * CELL_SIZE;
+	rect.w = CELL_SIZE;
+	rect.h = CELL_SIZE;
+	wolf_set_color(map[map_x][map_y]);
+	SDL_RenderFillRect(renderer, &rect);
+
+	glColor3f(0.5, 0.5, 0.5);
+	SDL_RenderDrawLine(renderer, position->x*CELL_SIZE, position->y*CELL_SIZE, (int)map_x*CELL_SIZE, (int)map_y*CELL_SIZE);
+}
+
 #define FOV 90
 
-static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction)
+static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction, draw_wall_fn draw_wall)
 {
 	double map_x, map_y;
 	int nr_rays = 640;
@@ -106,16 +122,8 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, struct
 			map_x += ray_direction.x;
 			map_y += ray_direction.y;
 		}
-		SDL_Rect rect;
-		rect.x = (int)map_x * CELL_SIZE;
-		rect.y = (int)map_y * CELL_SIZE;
-		rect.w = CELL_SIZE;
-		rect.h = CELL_SIZE;
-		wolf_set_color(map[(int)map_x][(int)map_y]);
-		SDL_RenderFillRect(renderer, &rect);
 
-		glColor3f(0.5, 0.5, 0.5);
-		SDL_RenderDrawLine(renderer, position->x*CELL_SIZE, position->y*CELL_SIZE, (int)map_x*CELL_SIZE, (int)map_y*CELL_SIZE);
+		draw_wall(renderer, position, map_x, map_y);
 	}
 }
 
@@ -189,7 +197,7 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 			SDL_RenderFillRect(renderer, &rect);
 		}
 	}
-	wolf_raycast(renderer, position, direction);
+	wolf_raycast(renderer, position, direction, wolf_minimap_draw_wall);
 }
 
 static struct point2 position   = { .x = 1, .y = 1 };
