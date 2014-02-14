@@ -202,6 +202,8 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double
 	}
 }
 
+static bool draw_minimap;
+
 static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction, float angle)
 {
 	glClearColor(0,0,0,0); 
@@ -222,27 +224,29 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 
 	glDisable(GL_DEPTH_TEST);
 
-	glMatrixMode(GL_PROJECTION); 
-	glLoadIdentity();
-	glOrtho(-640 + CELL_SIZE * MAP_WIDTH, CELL_SIZE * MAP_WIDTH, 480, 0, 0, 1); 
+	if (draw_minimap) {
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-640 + CELL_SIZE * MAP_WIDTH, CELL_SIZE * MAP_WIDTH, 480, 0, 0, 1);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glColor3f(0.5, 0.5, 0.5);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glColor3f(0.5, 0.5, 0.5);
 
-	for (int y = 0; y < MAP_HEIGHT; y++) {
-		for (int x = 0; x < MAP_WIDTH; x++) {
-			if (!map[x][y])
-				continue;
-			SDL_Rect rect;
-			rect.x = x * CELL_SIZE;
-			rect.y = y * CELL_SIZE;
-			rect.w = CELL_SIZE;
-			rect.h = CELL_SIZE;
-			SDL_RenderFillRect(renderer, &rect);
+		for (int y = 0; y < MAP_HEIGHT; y++) {
+			for (int x = 0; x < MAP_WIDTH; x++) {
+				if (!map[x][y])
+					continue;
+				SDL_Rect rect;
+				rect.x = x * CELL_SIZE;
+				rect.y = y * CELL_SIZE;
+				rect.w = CELL_SIZE;
+				rect.h = CELL_SIZE;
+				SDL_RenderFillRect(renderer, &rect);
+			}
 		}
+		wolf_raycast(renderer, position, angle, wolf_minimap_draw_wall);
 	}
-	wolf_raycast(renderer, position, angle, wolf_minimap_draw_wall);
 }
 
 static struct point2 position   = { .x = 1.5, .y = 2 };
@@ -322,6 +326,10 @@ static void wolf_input(void)
 			}
 			case SDLK_LEFT: {
 				angle_step = -0.005;
+				break;
+			}
+			case 'm': {
+				draw_minimap = !draw_minimap;
 				break;
 			}
 			default:
