@@ -256,6 +256,50 @@ static float velocity;
 static float angle_step;
 static float angle = 0.0;
 
+static bool wolf_try_to_move(struct point2 *pos)
+{
+	int x0, x1, y0, y1;
+	double size = 0.2;
+
+	x0 = pos->x - size;
+	x1 = pos->x + size;
+	y0 = pos->y - size;
+	y1 = pos->y + size;
+
+	for (int x = x0; x <= x1; x++) {
+		for (int y = y0; y <= y1; y++) {
+			if (map[x][y])
+				return false;
+		}
+	}
+	return true;
+}
+
+static struct point2 wolf_clip_move(struct point2 *old_pos, struct point2 *new_pos)
+{
+	struct point2 pos;
+
+	pos.x = new_pos->x;
+	pos.y = new_pos->y;
+
+	if (wolf_try_to_move(&pos))
+		return pos;
+
+	pos.x = new_pos->x;
+	pos.y = old_pos->y;
+
+	if (wolf_try_to_move(&pos))
+		return pos;
+
+	pos.x = old_pos->x;
+	pos.y = new_pos->y;
+
+	if (wolf_try_to_move(&pos))
+		return pos;
+
+	return *old_pos;
+}
+
 static void wolf_update(unsigned int time_delta)
 {
 	struct vector2 new_direction;
@@ -264,10 +308,7 @@ static void wolf_update(unsigned int time_delta)
 	new_position.x = position.x + direction.x*velocity * time_delta;
 	new_position.y = position.y + direction.y*velocity * time_delta;
 
-	if (!map[(int)new_position.x][(int)new_position.y]) {
-		position.x = new_position.x;
-		position.y = new_position.y;
-	}
+	position = wolf_clip_move(&position, &new_position);
 
 	angle += angle_step*time_delta;
 
