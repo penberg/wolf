@@ -1,3 +1,4 @@
+#include <SDL_image.h>
 #include <stdbool.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
@@ -85,10 +86,10 @@ typedef void (*draw_wall_fn)(SDL_Renderer *renderer, struct point2 *position, in
 
 static struct point2 wolf_cube_mesh[4][4] = {
 	{
-		{ 0.0, 0.0 },
-		{ 0.0, 0.0 },
 		{ 1.0, 0.0 },
 		{ 1.0, 0.0 },
+		{ 0.0, 0.0 },
+		{ 0.0, 0.0 },
 	},
 	{
 		{ 0.0, 1.0 },
@@ -103,24 +104,32 @@ static struct point2 wolf_cube_mesh[4][4] = {
 		{ 0.0, 1.0 },
 	},
 	{
-		{ 1.0, 0.0 },
-		{ 1.0, 0.0 },
 		{ 1.0, 1.0 },
 		{ 1.0, 1.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 0.0 },
 	},
 };
+
+static GLuint textures[2];
 
 static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int x, int y)
 {
 	float wall_height = 1.5;
 
-	wolf_set_color(map[x][y]);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+	glEnable(GL_TEXTURE_2D);
 
 	for (int i = 0; i < 4; i++) {
 		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(x+wolf_cube_mesh[i][0].x, 0.0f,        y+wolf_cube_mesh[i][0].y);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(x+wolf_cube_mesh[i][1].x, wall_height, y+wolf_cube_mesh[i][1].y);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(x+wolf_cube_mesh[i][2].x, wall_height, y+wolf_cube_mesh[i][2].y);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(x+wolf_cube_mesh[i][3].x, 0.0f,        y+wolf_cube_mesh[i][3].y);
 		glEnd();
 	}
@@ -395,6 +404,28 @@ static void wolf_input(void)
 	}
 }
 
+static void wolf_load_texture(unsigned int idx, const char *filename)
+{
+	SDL_Surface* surface;
+
+	surface = IMG_Load(filename);
+	if (!surface) {
+		fprintf(stderr, "%s: error loading texture: %s\n",
+			filename, SDL_GetError());
+		return;
+	}
+	glGenTextures(1, &textures[idx]);
+	glBindTexture(GL_TEXTURE_2D, textures[idx]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, surface->w, surface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, surface->pixels);
+
+	SDL_FreeSurface(surface);
+}
+
 int main(int argc, char* argv[])
 {
 	SDL_Window *window;
@@ -420,6 +451,8 @@ int main(int argc, char* argv[])
 				SDL_RENDERER_ACCELERATED |
 				SDL_RENDERER_PRESENTVSYNC);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	wolf_load_texture(0, "Assets/Textures/Wall.jpg");
 
 	glViewport(0, 0, (GLsizei) 640, (GLsizei) 480);
 
