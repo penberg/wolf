@@ -113,6 +113,33 @@ static struct point2 wolf_cube_mesh[4][4] = {
 
 static GLuint textures[2];
 
+static void wolf_draw_floor(void)
+{
+       int x_step, y_step;
+
+       x_step = 1;
+       y_step = 1;
+
+       glBindTexture(GL_TEXTURE_2D, textures[1]);
+
+       glEnable(GL_TEXTURE_2D);
+
+       for (int x = 0; x < MAP_WIDTH; x += x_step) {
+	       for (int y = 0; y < MAP_HEIGHT; y += y_step) {
+	       glBegin(GL_QUADS);
+	       glTexCoord2f(0.0f, 1.0f);
+		       glVertex3f(x, 0.0f, y);
+		       glTexCoord2f(0.0f, 0.0f);
+		       glVertex3f(x+x_step, 0.0f, y);
+		       glTexCoord2f(1.0f, 0.0f);
+		       glVertex3f(x+x_step, 0.0f, y+y_step);
+		       glTexCoord2f(1.0f, 1.0f);
+		       glVertex3f(x, 0.0f, y+y_step);
+		       glEnd();
+	       }
+       }
+}
+
 static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int x, int y)
 {
 	float wall_height = 1.5;
@@ -239,6 +266,8 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 	glTranslatef(-position->x, -0.3, -position->y);
 
 	glEnable(GL_DEPTH_TEST);
+
+	wolf_draw_floor();
 
 	wolf_raycast(renderer, position, angle, wolf_draw_wall);
 
@@ -453,6 +482,7 @@ int main(int argc, char* argv[])
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	wolf_load_texture(0, "Assets/Textures/Wall.jpg");
+	wolf_load_texture(1, "Assets/Textures/Floor.jpg");
 
 	glViewport(0, 0, (GLsizei) 640, (GLsizei) 480);
 
