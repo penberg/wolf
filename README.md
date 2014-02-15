@@ -9,6 +9,8 @@ have 90-degree angles between them.
 
 The design of the engine is similar to the [iPhone port of Wolfenstein 3D](http://fabiensanglard.net/wolf3d/index.php).
 
+![alt text](https://github.com/penberg/wolf/raw/master/Wolf.png "Wolf")
+
 ## Features
 
 - 2D maps
