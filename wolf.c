@@ -83,36 +83,47 @@ static void wolf_set_color(int color)
 
 typedef void (*draw_wall_fn)(SDL_Renderer *renderer, struct point2 *position, int x, int y);
 
+static struct point2 wolf_cube_mesh[4][4] = {
+	{
+		{ 0.0, 0.0 },
+		{ 0.0, 0.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 0.0 },
+	},
+	{
+		{ 0.0, 1.0 },
+		{ 0.0, 1.0 },
+		{ 1.0, 1.0 },
+		{ 1.0, 1.0 },
+	},
+	{
+		{ 0.0, 0.0 },
+		{ 0.0, 0.0 },
+		{ 0.0, 1.0 },
+		{ 0.0, 1.0 },
+	},
+	{
+		{ 1.0, 0.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 1.0 },
+		{ 1.0, 1.0 },
+	},
+};
+
 static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int x, int y)
 {
 	float wall_height = 1.5;
 
 	wolf_set_color(map[x][y]);
 
-	glBegin(GL_QUADS);
-	glVertex3f(x+0.0f, 0.0f, y); // The bottom left corner  
-	glVertex3f(x+0.0f, wall_height, y); // The top left corner  
-	glVertex3f(x+1.0f, wall_height, y); // The top right corner  
-	glVertex3f(x+1.0f, 0.0f, y); // The bottom right corner  
-	glEnd();
-	glBegin(GL_QUADS);
-	glVertex3f(x+0.0f, 0.0f, y+1.0f); // The bottom left corner  
-	glVertex3f(x+0.0f, wall_height, y+1.0f); // The top left corner  
-	glVertex3f(x+1.0f, wall_height, y+1.0f); // The top right corner  
-	glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
-	glEnd();
-	glBegin(GL_QUADS);
-	glVertex3f(x, 0.0f, y+0.0f); // The bottom left corner  
-	glVertex3f(x, wall_height, y+0.0f); // The top left corner  
-	glVertex3f(x, wall_height, y+1.0f); // The top right corner  
-	glVertex3f(x, 0.0f, y+1.0f); // The bottom right corner  
-	glEnd();
-	glBegin(GL_QUADS);
-	glVertex3f(x+1.0f, 0.0f, y+0.0f); // The bottom left corner  
-	glVertex3f(x+1.0f, wall_height, y+0.0f); // The top left corner  
-	glVertex3f(x+1.0f, wall_height, y+1.0f); // The top right corner  
-	glVertex3f(x+1.0f, 0.0f, y+1.0f); // The bottom right corner  
-	glEnd();
+	for (int i = 0; i < 4; i++) {
+		glBegin(GL_QUADS);
+		glVertex3f(x+wolf_cube_mesh[i][0].x, 0.0f,        y+wolf_cube_mesh[i][0].y);
+		glVertex3f(x+wolf_cube_mesh[i][1].x, wall_height, y+wolf_cube_mesh[i][1].y);
+		glVertex3f(x+wolf_cube_mesh[i][2].x, wall_height, y+wolf_cube_mesh[i][2].y);
+		glVertex3f(x+wolf_cube_mesh[i][3].x, 0.0f,        y+wolf_cube_mesh[i][3].y);
+		glEnd();
+	}
 }
 
 static void wolf_minimap_draw_wall(SDL_Renderer *renderer, struct point2 *position, int map_x, int map_y)
