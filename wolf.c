@@ -60,28 +60,6 @@ static double degrees_to_radians(double angle)
 	return angle * M_PI/180.0;
 }
 
-static void wolf_set_color(int color)
-{
-	switch (color) {
-        case 1: /* red */
-		glColor3f(1.0, 0.0, 0.0);
-		break;
-        case 2: /* green */
-		glColor3f(0.0, 1.0, 0.0);
-		break;
-        case 3: /* blue */
-		glColor3f(0.0, 0.0, 1.0);
-		break;
-        case 4: /* white */
-		glColor3f(1.0, 1.0, 1.0);
-		break;
-        default:
-		glColor3f(1.0, 1.0, 0.0);
-		break;
-	}
-
-}
-
 typedef void (*draw_wall_fn)(SDL_Renderer *renderer, struct point2 *position, int x, int y);
 
 static struct point2 wolf_cube_mesh[4][4] = {
@@ -162,20 +140,6 @@ static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int 
 	}
 }
 
-static void wolf_minimap_draw_wall(SDL_Renderer *renderer, struct point2 *position, int map_x, int map_y)
-{
-	SDL_Rect rect;
-	rect.x = map_x * CELL_SIZE;
-	rect.y = map_y * CELL_SIZE;
-	rect.w = CELL_SIZE;
-	rect.h = CELL_SIZE;
-	wolf_set_color(map[map_x][map_y]);
-	SDL_RenderFillRect(renderer, &rect);
-
-	glColor3f(0.5, 0.5, 0.5);
-	SDL_RenderDrawLine(renderer, position->x*CELL_SIZE, position->y*CELL_SIZE, (int)map_x*CELL_SIZE, (int)map_y*CELL_SIZE);
-}
-
 #define FOV 90
 
 static int sign(double x)
@@ -249,8 +213,6 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double
 	}
 }
 
-static bool draw_minimap;
-
 static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction, float angle)
 {
 	glClearColor(0,0,0,0); 
@@ -270,32 +232,6 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 	wolf_draw_floor();
 
 	wolf_raycast(renderer, position, angle, wolf_draw_wall);
-
-	glDisable(GL_DEPTH_TEST);
-
-	if (draw_minimap) {
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-640 + CELL_SIZE * MAP_WIDTH, CELL_SIZE * MAP_WIDTH, 480, 0, 0, 1);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glColor3f(0.5, 0.5, 0.5);
-
-		for (int y = 0; y < MAP_HEIGHT; y++) {
-			for (int x = 0; x < MAP_WIDTH; x++) {
-				if (!map[x][y])
-					continue;
-				SDL_Rect rect;
-				rect.x = x * CELL_SIZE;
-				rect.y = y * CELL_SIZE;
-				rect.w = CELL_SIZE;
-				rect.h = CELL_SIZE;
-				SDL_RenderFillRect(renderer, &rect);
-			}
-		}
-		wolf_raycast(renderer, position, angle, wolf_minimap_draw_wall);
-	}
 }
 
 static struct point2 position   = { .x = 1.5, .y = 2 };
@@ -416,10 +352,6 @@ static void wolf_input(void)
 			}
 			case SDLK_LEFT: {
 				angle_step = -0.005;
-				break;
-			}
-			case 'm': {
-				draw_minimap = !draw_minimap;
 				break;
 			}
 			default:
