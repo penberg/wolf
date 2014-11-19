@@ -126,18 +126,24 @@ static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int 
 
 	glEnable(GL_TEXTURE_2D);
 
+	glPushMatrix();
+
+	glTranslatef(x, 0, y);
+
 	for (int i = 0; i < 4; i++) {
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(x+wolf_cube_mesh[i][0].x, 0.0f,        y+wolf_cube_mesh[i][0].y);
+		glVertex3f(wolf_cube_mesh[i][0].x, 0.0f,        wolf_cube_mesh[i][0].y);
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(x+wolf_cube_mesh[i][1].x, wall_height, y+wolf_cube_mesh[i][1].y);
+		glVertex3f(wolf_cube_mesh[i][1].x, wall_height, wolf_cube_mesh[i][1].y);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(x+wolf_cube_mesh[i][2].x, wall_height, y+wolf_cube_mesh[i][2].y);
+		glVertex3f(wolf_cube_mesh[i][2].x, wall_height, wolf_cube_mesh[i][2].y);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(x+wolf_cube_mesh[i][3].x, 0.0f,        y+wolf_cube_mesh[i][3].y);
+		glVertex3f(wolf_cube_mesh[i][3].x, 0.0f,        wolf_cube_mesh[i][3].y);
 		glEnd();
 	}
+
+	glPopMatrix();
 }
 
 #define FOV 90
