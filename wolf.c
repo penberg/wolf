@@ -1,5 +1,6 @@
 #include <SDL_image.h>
 #include <stdbool.h>
+#include <GL/glew.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
 #include <stdio.h>
@@ -426,6 +427,9 @@ int main(int argc, char* argv[])
 	}
 
 	context = SDL_GL_CreateContext(window);
+
+	glewExperimental = GL_TRUE;
+	glewInit();
 
 	wolf_load_texture(0, "Assets/Textures/Wall.jpg");
 	wolf_load_texture(1, "Assets/Textures/Floor.jpg");
