@@ -60,7 +60,7 @@ static double degrees_to_radians(double angle)
 	return angle * M_PI/180.0;
 }
 
-typedef void (*draw_wall_fn)(SDL_Renderer *renderer, struct point2 *position, int x, int y);
+typedef void (*draw_wall_fn)(struct point2 *position, int x, int y);
 
 static struct point2 wolf_cube_mesh[4][4] = {
 	{
@@ -123,7 +123,7 @@ static void wolf_draw_floor(void)
        }
 }
 
-static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int x, int y)
+static void wolf_draw_wall(struct point2 *position, int x, int y)
 {
 	float wall_height = 1.5;
 
@@ -168,7 +168,7 @@ static int sign(double x)
 	}
 }
 
-static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double angle, draw_wall_fn draw_wall)
+static void wolf_raycast(struct point2 *position, double angle, draw_wall_fn draw_wall)
 {
 	double fov = degrees_to_radians(FOV) * 640.0/480.0;
 	double ray_step = fov / (double) 640.0;
@@ -224,11 +224,11 @@ static void wolf_raycast(SDL_Renderer *renderer, struct point2 *position, double
 			}
 		}
 
-		draw_wall(renderer, position, x, y);
+		draw_wall(position, x, y);
 	}
 }
 
-static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct vector2 *direction, float angle)
+static void wolf_frame(struct point2 *position, struct vector2 *direction, float angle)
 {
 	glClearColor(0,0,0,0); 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
@@ -246,7 +246,7 @@ static void wolf_frame(SDL_Renderer *renderer, struct point2 *position, struct v
 
 	wolf_draw_floor();
 
-	wolf_raycast(renderer, position, angle, wolf_draw_wall);
+	wolf_raycast(position, angle, wolf_draw_wall);
 }
 
 static struct point2 position   = { .x = 1.5, .y = 2 };
@@ -404,9 +404,13 @@ static void wolf_load_texture(unsigned int idx, const char *filename)
 
 int main(int argc, char* argv[])
 {
+	SDL_GLContext context;
 	SDL_Window *window;
 
 	SDL_Init(SDL_INIT_VIDEO);
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
 	window = SDL_CreateWindow(
 		"Wolf",
@@ -421,12 +425,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	SDL_Renderer *renderer;
-
-	renderer = SDL_CreateRenderer(window, -1,
-				SDL_RENDERER_ACCELERATED |
-				SDL_RENDERER_PRESENTVSYNC);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	context = SDL_GL_CreateContext(window);
 
 	wolf_load_texture(0, "Assets/Textures/Wall.jpg");
 	wolf_load_texture(1, "Assets/Textures/Floor.jpg");
@@ -444,14 +443,16 @@ int main(int argc, char* argv[])
 
 		wolf_update(time_delta);
 
-		wolf_frame(renderer, &position, &direction, angle);
+		wolf_frame(&position, &direction, angle);
 
-		SDL_RenderPresent(renderer);
+		SDL_GL_SwapWindow(window);
 
 		frame_end = SDL_GetTicks();
 
 		time_delta = frame_end - frame_start;
 	}
+
+	SDL_GL_DeleteContext(context);
 
 	SDL_DestroyWindow(window);
 
