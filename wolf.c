@@ -7,6 +7,8 @@
 #include <math.h>
 #include <SDL.h>
 
+#include "linmath.h"
+
 enum {
 	MAP_WIDTH	= 24,
 	MAP_HEIGHT	= 24,
@@ -119,6 +121,8 @@ static void wolf_draw_floor(void)
        }
 }
 
+mat4x4 model_view;
+
 static void wolf_draw_wall(struct point2 *position, int x, int y)
 {
 	float wall_height = 1.5;
@@ -127,9 +131,12 @@ static void wolf_draw_wall(struct point2 *position, int x, int y)
 
 	glEnable(GL_TEXTURE_2D);
 
-	glPushMatrix();
+	mat4x4 mat;
+	mat4x4_dup(mat, model_view);
+	mat4x4_translate_in_place(mat, x, 0, y);
 
-	glTranslatef(x, 0, y);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf((const GLfloat*) mat);
 
 	for (int i = 0; i < 4; i++) {
 		glBegin(GL_TRIANGLE_STRIP);
@@ -147,8 +154,6 @@ static void wolf_draw_wall(struct point2 *position, int x, int y)
 		glVertex3f(wolf_cube_mesh[i][3].x, 0.0f,        wolf_cube_mesh[i][3].y);
 		glEnd();
 	}
-
-	glPopMatrix();
 }
 
 #define FOV 90
@@ -229,13 +234,30 @@ static void wolf_frame(struct point2 *position, struct vector2 *direction, float
 	glClearColor(0,0,0,0); 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
 
-	glMatrixMode(GL_PROJECTION); 
-	glLoadIdentity();
-	gluPerspective(FOV, 640.0/480.0, 0.1f, 64.0f);
+	mat4x4 project;
+	mat4x4_identity(project);
+	mat4x4_perspective(project, degrees_to_radians(FOV), 640.0/480.0, 0.1f, 64.0f);
+
+	mat4x4_identity(model_view);
+	vec3 eye;
+	eye[0] = position->x;
+	eye[1] = 0.3;
+	eye[2] = position->y;
+	vec3 center;
+	center[0] = position->x+direction->x;
+	center[1] = 0.3;
+	center[2] = position->y+direction->y;
+	vec3 up;
+	up[0] = 0.0;
+	up[1] = 1.0;
+	up[2] = 0.0;
+	mat4x4_look_at(model_view, eye, center, up);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf((const GLfloat*) project);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(position->x, 0.3, position->y, position->x+direction->x, 0.3, position->y+direction->y, 0.0, 1.0, 0.0);
+	glLoadMatrixf((const GLfloat*) model_view);
 
 	glEnable(GL_DEPTH_TEST);
 
