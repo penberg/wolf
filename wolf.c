@@ -104,16 +104,21 @@ static void wolf_draw_floor(void)
 
        for (int x = 0; x < MAP_WIDTH; x += x_step) {
 	       for (int y = 0; y < MAP_HEIGHT; y += y_step) {
-	       glBegin(GL_QUADS);
-	       glTexCoord2f(0.0f, 1.0f);
-		       glVertex3f(x, 0.0f, y);
-		       glTexCoord2f(0.0f, 0.0f);
-		       glVertex3f(x+x_step, 0.0f, y);
-		       glTexCoord2f(1.0f, 0.0f);
-		       glVertex3f(x+x_step, 0.0f, y+y_step);
-		       glTexCoord2f(1.0f, 1.0f);
-		       glVertex3f(x, 0.0f, y+y_step);
-		       glEnd();
+			glBegin(GL_TRIANGLE_STRIP);
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex3f(x, 0.0f, y);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(x+x_step, 0.0f, y);
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex3f(x+x_step, 0.0f, y+y_step);
+
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex3f(x, 0.0f, y);
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex3f(x+x_step, 0.0f, y+y_step);
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex3f(x, 0.0f, y+y_step);
+			glEnd();
 	       }
        }
 }
@@ -131,11 +136,15 @@ static void wolf_draw_wall(SDL_Renderer *renderer, struct point2 *position, int 
 	glTranslatef(x, 0, y);
 
 	for (int i = 0; i < 4; i++) {
-		glBegin(GL_QUADS);
+		glBegin(GL_TRIANGLE_STRIP);
 		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(wolf_cube_mesh[i][0].x, 0.0f,        wolf_cube_mesh[i][0].y);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(wolf_cube_mesh[i][1].x, wall_height, wolf_cube_mesh[i][1].y);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(wolf_cube_mesh[i][2].x, wall_height, wolf_cube_mesh[i][2].y);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(wolf_cube_mesh[i][0].x, 0.0f,        wolf_cube_mesh[i][0].y);
 		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(wolf_cube_mesh[i][2].x, wall_height, wolf_cube_mesh[i][2].y);
 		glTexCoord2f(1.0f, 1.0f);
