@@ -51,11 +51,6 @@ struct vector2 {
 	double y;
 };
 
-static double radians_to_degrees(double angle)
-{
-	return angle * 180.0/M_PI;
-}
-
 static double degrees_to_radians(double angle)
 {
 	return angle * M_PI/180.0;
@@ -240,8 +235,7 @@ static void wolf_frame(struct point2 *position, struct vector2 *direction, float
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glRotatef(90+radians_to_degrees(angle), 0, 1, 0);
-	glTranslatef(-position->x, -0.3, -position->y);
+	gluLookAt(position->x, 0.3, position->y, position->x+direction->x, 0.3, position->y+direction->y, 0.0, 1.0, 0.0);
 
 	glEnable(GL_DEPTH_TEST);
 
