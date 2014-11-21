@@ -91,17 +91,17 @@ static GLuint textures[2];
 
 static void wolf_draw_floor(void)
 {
-       int x_step, y_step;
+	int x_step, y_step;
 
-       x_step = 1;
-       y_step = 1;
+	x_step = 1;
+	y_step = 1;
 
-       glBindTexture(GL_TEXTURE_2D, textures[1]);
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
 
-       glEnable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE_2D);
 
-       for (int x = 0; x < MAP_WIDTH; x += x_step) {
-	       for (int y = 0; y < MAP_HEIGHT; y += y_step) {
+	for (int x = 0; x < MAP_WIDTH; x += x_step) {
+		for (int y = 0; y < MAP_HEIGHT; y += y_step) {
 			glBegin(GL_TRIANGLE_STRIP);
 			glTexCoord2f(0.0f, 1.0f);
 			glVertex3f(x, 0.0f, y);
@@ -117,8 +117,8 @@ static void wolf_draw_floor(void)
 			glTexCoord2f(1.0f, 1.0f);
 			glVertex3f(x, 0.0f, y+y_step);
 			glEnd();
-	       }
-       }
+		}
+	}
 }
 
 mat4x4 model_view;
